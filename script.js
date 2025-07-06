@@ -23,6 +23,7 @@ const data = [
     return table;
   }
   
-  // bodyなど好きな場所に追加
-  document.body.appendChild(createTable(data));
-  
+//   // bodyなど好きな場所に追加
+//   document.body.appendChild(createTable(data));
+const container = document.getElementById("table");
+container.appendChild(createTable(data));  // createTableは表を作る関数
