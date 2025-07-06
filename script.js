@@ -20,7 +20,7 @@ function enumerateCombinations(data, maxSlots = 4) {
     let equipCounts = data.length - 1; // ヘッダーを除く
     let nHrCounts = nHr(equipCounts, maxSlots)
 
-    let result = [data[0]]; // ヘッダー
+    let result = [];
     let result_i = Array(maxSlots).fill(0); // 装備無し行
     result.push([...result_i]); // 装備無し行をコピーして追加
 
