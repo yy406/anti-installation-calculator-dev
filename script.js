@@ -70,3 +70,5 @@ const container = document.getElementById("table");
 container.appendChild(createTable(data));  // createTableは表を作る関数
 const container2 = document.getElementById("table2");
 container2.appendChild(createTable(data2));  // createTableは表を作る関数
+const container3 = document.getElementById("table3");
+container3.appendChild(createTable(enumerateCombinations(data)));  // createTableは表を作る関数
