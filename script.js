@@ -64,21 +64,7 @@ function nHr(n, r) {
     
     // nHr の計算を行う式
     return factorial(n + r - 1) / (factorial(n - 1) * factorial(r));
-  }
-
-// // タブ切り替え処理
-// document.querySelectorAll(".tab-button").forEach(button => {
-//   button.addEventListener("click", () => {
-//     // すべてのタブとボタンの active を外す
-//     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-//     document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active-button"));
-
-//     // 選択されたタブだけ active にする
-//     const target = button.getAttribute("data-tab");
-//     document.getElementById(target).classList.add("active");
-//     button.classList.add("active-button");
-//   });
-// });
+}
 
 // タブを開く関数
 function openTab(evt, tabName) {
