@@ -10,8 +10,10 @@
     <body>
         <h1>【開発版】対地補正計算機</h1>
         <!-- タブ切り替えボタン -->
-        <button class="tab-button active-button" data-tab="tab1">メイン</button>
-        <button class="tab-button" data-tab="tab2">開発タブ</button>
+        <button class="tablinks" onclick="openTab(event, 'Tab1')">メイン</button>
+        <button class="tablinks" onclick="openTab(event, 'Tab2')">開発</button>
+        <!-- <button class="tab-button active-button" data-tab="tab1">メイン</button> -->
+        <!-- <button class="tab-button" data-tab="tab2">開発タブ</button> -->
 
         <!-- タブごとの表示エリア -->
         <div id="tab1" class="tab-content active">
