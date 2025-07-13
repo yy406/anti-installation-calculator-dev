@@ -25,7 +25,7 @@ function openTab(evt, tabName) {
 // 表を作る関数
 function createTable(data) {
     const table = document.createElement("table");
-    table.border = "1"; // 罫線をつける（簡易的に）
+    table.border = "1"; // 罫線をつける（簡易的に）　非推奨なので、cssに手を付けたらそっちで処理したい
     
     data.forEach((rowData, rowIndex) => {
         const row = document.createElement("tr");
