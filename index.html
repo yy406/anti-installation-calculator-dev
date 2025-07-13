@@ -10,34 +10,37 @@
     <body>
         <h1>【開発版】対地補正計算機</h1>
         <!-- タブ切り替えボタン -->
-        <button class="tablinks" onclick="openTab(event, 'Tab1')">メイン</button>
-        <button class="tablinks" onclick="openTab(event, 'Tab2')">開発</button>
-        <button class="tablinks" onclick="openTab(event, 'Tab3')">実装予定項目</button>
+        <button class="tablinks" onclick="openTab(event, 'tabMainInputs')">計算条件</button>
+        <button class="tablinks" onclick="openTab(event, 'tabDev')">開発</button>
+        <button class="tablinks" onclick="openTab(event, 'tabToDoList')">実装予定項目</button>
 
         <!-- タブごとの表示エリア -->
-        <!-- メインタブこっから -->
-        <div id="Tab1" class="tabcontent">
-            <h2>メイン</h2>
+        <!-- 計算条件タブ -->
+        <div id="tabMainInputs" class="tabcontent">
+            <h2>計算条件</h2>
         </div>
-        <!-- 開発タブこっから -->
-        <div id="Tab2" class="tabcontent">
+        <!-- 開発タブ -->
+        <div id="tabDev" class="tabcontent">
             <h2>開発</h2>
             <h2>装備リスト</h2>
             <div id="table1"></div>
             <h2>計算結果</h2>
             <div id="table2"></div>
         </div>
-        <!-- 実装予定項目タブこっから -->
-        <div id="Tab3" class="tabcontent">
+        <!-- 実装予定項目タブ -->
+        <div id="tabToDoList" class="tabcontent">
             <h2>実装予定項目</h2>
             <ul>
-                <li>い</li>
+                <li>inputの表を動的に</li>
                 <li>ろ</li>
                 <li>は</li>
                 <li>に</li>
             </ul>
         </div>
 
-        <script src="script.js"></script>
+        <script src="main.js"></script>
+        <script src="mainInputs.js"></script>
+        <script src="dev.js"></script>
+        <!-- <script src="modCalc.js"></script> -->
     </body>
 </html>

@@ -13,24 +13,6 @@ container.appendChild(createTable(data1));
 var container = document.getElementById("table2");
 container.appendChild(createTable(enumerateCombinations(data1)));
 
-// 表を作る関数
-function createTable(data) {
-    const table = document.createElement("table");
-    table.border = "1"; // 罫線をつける（簡易的に）
-    
-    data.forEach((rowData, rowIndex) => {
-        const row = document.createElement("tr");
-        rowData.forEach(cellData => {
-        const cell = rowIndex === 0 ? document.createElement("th") : document.createElement("td");
-        cell.textContent = cellData;
-        row.appendChild(cell);
-        });
-        table.appendChild(row);
-    });
-    
-    return table;
-}
-
 // 装備の組み合わせを列挙する関数
 function enumerateCombinations(data, maxSlots = 4) {
     let equipCounts = data.length - 1; // ヘッダーを除く
@@ -65,27 +47,3 @@ function nHr(n, r) {
     // nHr の計算を行う式
     return factorial(n + r - 1) / (factorial(n - 1) * factorial(r));
 }
-
-// タブを開く関数
-function openTab(evt, tabName) {
-    // 全てのタブの内容を非表示にする
-    var tabcontent = document.getElementsByClassName("tabcontent");
-    for (var i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // 全てのタブボタンから"active"クラスを外す
-    var tablinks = document.getElementsByClassName("tablinks");
-    for (var i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // 選択したタブを表示し、ボタンを"active"にする
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-// 初期状態で最初のタブを開く
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelector(".tablinks").click();
-});
