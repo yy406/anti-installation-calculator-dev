@@ -11,14 +11,15 @@
         <h1>【開発版】対地補正計算機</h1>
         <!-- タブ切り替えボタン -->
         <button class="tablinks" onclick="openTab(event, 'tabMainInputs')">計算条件</button>
-        <button class="tablinks" onclick="openTab(event, 'tabDev')">開発</button>
+        <button class="tablinks" onclick="openTab(event, 'tabMainOutputs')">計算結果</button>
+        <!-- <button class="tablinks" onclick="openTab(event, 'tabDev')">開発</button> -->
         <button class="tablinks" onclick="openTab(event, 'tabToDoList')">実装予定項目</button>
 
         <!-- タブごとの表示エリア -->
         <!-- 計算条件タブ -->
         <div id="tabMainInputs" class="tabcontent">
             <h2>計算条件</h2>
-            <h3>基本条件</h3>
+            <button id="runCalcBtn">計算実行</button>
             <h3>装備条件</h3>
             <div>
                 <label for="inputSlotNum">対地スロット数：</label>
@@ -28,14 +29,18 @@
             <h3>攻撃力条件</h3>
             <h3>攻撃力詳細条件</h3>
         </div>
-        <!-- 開発タブ -->
+        <!-- 計算結果タブ -->
+        <div id="tabMainOutputs" class="tabcontent">
+            <h2>計算結果</h2>
+        </div>
+        <!-- 開発タブ
         <div id="tabDev" class="tabcontent">
             <h2>開発</h2>
             <h2>装備リスト</h2>
             <div id="table1"></div>
             <h2>計算結果</h2>
             <div id="table2"></div>
-        </div>
+        </div> -->
         <!-- 実装予定項目タブ -->
         <div id="tabToDoList" class="tabcontent">
             <h2>実装予定項目</h2>
@@ -51,7 +56,8 @@
 
         <script src="20_main.js"></script>
         <script src="21_mainInputs.js"></script>
-        <script src="22_dev.js"></script>
+        <!-- <script src="22_dev.js"></script> -->
+        <script src="23_modCalc.js"></script>
         <!-- <script src="modCalc.js"></script> -->
     </body>
 </html>
