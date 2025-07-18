@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // スロット数と装備条件のデータを取得
     const slotNum = getSlotNum();
     const mainInputs = getMainInputTableData();
+
+    console.log("スロット数:", slotNum);
+    console.log("装備条件:", mainInputs);
   });
 });
 
