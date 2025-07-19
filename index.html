@@ -22,7 +22,14 @@
             <h3>装備条件</h3>
             <div>
                 <label for="inputSlotNum">対地スロット数：</label>
-                <input type="number" id="inputSlotNum" value="3">
+                <input
+                    type="number"
+                    id="inputSlotNum"
+                    value="3"
+                    min="1"
+                    step="1"
+                    oninput="validity.valid||(value='');"
+                >
             </div>
             <div id="tableMainInputs"></div>
             <h3>攻撃力条件</h3>
@@ -33,17 +40,18 @@
         <div id="tabMainOutputs" class="tabcontent">
             <h2>計算結果</h2>
         </div>
+
         <!-- 実装予定項目タブ -->
-        
         <div id="tabToDoList" class="tabcontent">
             <h2>実装予定項目</h2>
             <ul>
-                <li>装備種類数を可変にする。tableMainInputsの行数を変えるボタンを作りたい。各行に-ボタン、右上と右下に追加ボタン</li>
+                <li>装備種類数固定のまま、とりあえず組み合わせ出力</li>
                 <li>スロット数と装備種類数が揃ったら例の表を作る。空スロット忘れないこと。</li>
                 <li>outputの表をとりあえず作れる。装備組み合わせだけでも表示</li>
                 <li>倍率出すのに必要なこと。艦（種）、敵タイプの入力を作る</li>
                 <li>倍率計算の実装</li>
                 <li>倍率計算の結果を表示する</li>
+                <li>装備種類数を可変にする。tableMainInputsの行数を変えるボタンを作りたい。各行に-ボタン、右上と右下に追加ボタン</li>
             </ul>
         </div>
 

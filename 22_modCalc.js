@@ -35,10 +35,6 @@ function getMainInputTableData() {
     var imp = parseInt(cells[3].querySelector("input").value, 10);
     var min = parseInt(cells[4].querySelector("input").value, 10);
     var max = parseInt(cells[5].querySelector("input").value, 10);
-    if (nameB === "") {
-        nameA = `${"なし"}${imp != 0 ? `★${imp}` : ''}`;
-        nameB = "なし";
-    }
 
     result[id] = { nameA, nameB, imp, min, max };
   }
