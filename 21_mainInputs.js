@@ -1,3 +1,14 @@
+const DEBUG_MODE = true;  // ← これがオンのときだけ、デフォルト値を入れる
+const defaultSelectValues = [
+  "陸戦隊", "士魂", "M4A1", "2号アフリカ", "ホニ",
+  "3号アフリカ", "チハ改", "3号J型", "特二内火", "特四内火改"
+];
+const defaultImpValues = [10, 3, 0, 0, 0, 0, 1, 2, 10, 2];
+const defaultMinValues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+const defaultMaxValues = [6, 1, 1, 2, 3, 1, 1, 1, 3, 1];
+
+
+
 // プルダウンで参照するリスト
 const options = ["なし", "三式弾", "三式弾改", "三式弾改二", "九一徹甲", "一式徹甲", "一式徹甲改", "WG", "四式噴進", "四式噴進集中", "二式迫撃", "二式迫撃集中", "大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改", "気球", "水戦/爆", "艦爆", "噴式機"]
 
@@ -43,6 +54,13 @@ function generateMainInputTableData(rows = 10) {
     maxInput.type = "number";
     maxInput.min = 0;
     maxInput.value = 6; // 初期値
+
+    if (DEBUG_MODE && i < defaultSelectValues.length) {
+      select.value = defaultSelectValues[i];
+      impNum.value = defaultImpValues[i];
+      minInput.value = defaultMinValues[i];
+      maxInput.value = defaultMaxValues[i];
+    }
 
     // 2列目　装備名★改修
     const selectedAndImpNum = document.createElement("input");
