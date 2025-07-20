@@ -14,28 +14,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // for(let i = 0; i < combinationsWithRepetition(equipKindsCounts, slotNum); i++){mainOutputsTable.push([i+1]);}
 
     // 重複組み合わせ表を生成（連番表記）
-    const serialNumberCombinations = generateCombinationsWithRepetitionArray(equipKindsCounts, slotNum);
+    let tableMainOutputs = generateCombinationsWithRepetitionArray(equipKindsCounts, slotNum);
     // 各No.の装備の上下限でフィルタリング
-    const filteredSerialNumberCombinations = filterByLimits(serialNumberCombinations, mainInputs);
+    tableMainOutputs = filterByLimits(tableMainOutputs, mainInputs);
     // 列名を追加
-    const filteredSerialNumberCombinationsHeader = [];
+    let tableMainOutputsHeader = [];
     for(let i = 0; i < slotNum; i++){
-      filteredSerialNumberCombinationsHeader.push(`装備${i + 1}`);
+      tableMainOutputsHeader.push(`装備${i + 1}`);
     }
-    filteredSerialNumberCombinations.unshift(filteredSerialNumberCombinationsHeader);
-    // mainOutputsTableに結合
-    // mainOutputsTable = appendColumns(mainOutputsTable, filteredSerialNumberCombinations);
-    var mainOutputsTable = filteredSerialNumberCombinations;
 
     // 装備名表記に変換
-    const equipNamesCombinations = convertSerialToEquipNames(filteredSerialNumberCombinations.slice(1), mainInputs);
-    equipNamesCombinations.unshift(filteredSerialNumberCombinationsHeader);
-    mainOutputsTable = appendColumns(mainOutputsTable, equipNamesCombinations);
+    const equipNamesCombinations = convertSerialToEquipNames(tableMainOutputs, mainInputs);
+    tableMainOutputs = appendColumns(tableMainOutputs, equipNamesCombinations);
+    // 列名を追加
+    for(let i = 0; i < slotNum; i++){
+      tableMainOutputsHeader.push(`装備${i + 1}`);
+    }
+
+    // 連番を追加
+    for(let i = 0; i < tableMainOutputs.length; i++){
+      tableMainOutputs[i].unshift(i + 1); // 1から始まる連番を追加
+    }
+    tableMainOutputsHeader.unshift("No."); // ヘッダーに「No.」を追加
 
     // 計算結果の表を表示
+    tableMainOutputs.unshift(tableMainOutputsHeader);
     var container = document.getElementById("tableMainOutputs");
     container.innerHTML = ""; // ここで以前の表を削除！
-    container.appendChild(createTable(mainOutputsTable));
+    container.appendChild(createTable(tableMainOutputs));
   });
 });
 
