@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
-  document.getElementById("runCalcBtn").addEventListener("click", () => {
+  document.getElementById("buttonRunCalc").addEventListener("click", () => {
     // スロット数と装備条件のデータを取得
-    const slotNum = getSlotNum();
-    const mainInputs = getMainInputTableData();
-     // 「なし」を必ず追加、★平均値改修補正対策
+    const slotNum = parseInt(document.getElementById("inputSlotNum").value, 10);
+    const mainInputs = getTableInputsData();
+    // 「なし」を必ず追加、★平均値改修補正対策
     mainInputs[0] = { nameA: "なし", nameB: "なし", imp: 0, min: 0, max: slotNum };
     // 装備種類数を取得
     const equipKindsCounts = Object.keys(mainInputs).length;
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mainOutputsTable = appendColumns(mainOutputsTable, equipNamesCombinations);
 
     // 計算結果の表を表示
-    var container = document.getElementById("mainOutputsTable");
+    var container = document.getElementById("tableMainOutputs");
     container.innerHTML = ""; // ここで以前の表を削除！
     container.appendChild(createTable(mainOutputsTable));
   });
@@ -48,16 +48,8 @@ function appendColumns(base, extras) {
   return base;
 }
 
-/**
- * 対地スロット数の値を取得する関数
- * @returns {number} スロット数（整数）
- */
-function getSlotNum() {
-  return parseInt(document.getElementById("inputSlotNum").value, 10);
-}
-
 // 装備条件の表を取得
-function getMainInputTableData() {
+function getTableInputsData() {
   const table = document.getElementById("tableMainInputs").querySelector("table");
   const result = {};
 
@@ -67,14 +59,14 @@ function getMainInputTableData() {
   for (let i = 1; i < rows.length; i++) {
     const cells = rows[i].querySelectorAll("td");
 
-    var id = cells[0].querySelector("input").value;
+    var serial = cells[0].querySelector("input").value;
     var nameA = cells[1].querySelector("input").value;
     var nameB = cells[2].querySelector("select").value;
     var imp = parseInt(cells[3].querySelector("input").value, 10);
     var min = parseInt(cells[4].querySelector("input").value, 10);
     var max = parseInt(cells[5].querySelector("input").value, 10);
 
-    result[id] = { nameA, nameB, imp, min, max };
+    result[serial] = { nameA, nameB, imp, min, max };
   }
 
   return result;
@@ -152,11 +144,9 @@ function filterByLimits(serialNumberArray, mainInputs) {
       }
     }
 
-    // 判定に応じて push（どちらか一方のみ）
+    // 判定に応じて push
     if (isValid) {
       result.push(serialNumberArray[i]);
-    } else {
-      // result.push(Array(serialNumberArray[i].length).fill("-"));
     }
   }
   return result;
