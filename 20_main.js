@@ -1,3 +1,5 @@
+// 20_main.js
+
 // 初期状態で最初のタブを開く
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelector(".tablinks").click();

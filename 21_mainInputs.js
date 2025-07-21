@@ -1,3 +1,5 @@
+// 21_mainInputs.js
+
 const DEBUG_MODE = true;  // ← これがオンのときだけ、デフォルト値を入れる
 const defaultSelectValues = [
   "陸戦隊", "士魂", "M4A1", "2号アフリカ", "ホニ",

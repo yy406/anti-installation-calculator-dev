@@ -1,3 +1,5 @@
+// 22_modCalc.js
+
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
   document.getElementById("buttonRunCalc").addEventListener("click", () => {
