@@ -12,26 +12,112 @@ document.addEventListener("DOMContentLoaded", () => {
     const equipKindsCounts = Object.keys(mainInputs).length;
 
     // 結果出力用の表を生成（No.、連番）※将来的にはソート後に付け加えるイメージ
-    // var mainOutputsTable = [["No."]];
+    // let mainOutputsTable = [["No."]];
     // for(let i = 0; i < combinationsWithRepetition(equipKindsCounts, slotNum); i++){mainOutputsTable.push([i+1]);}
 
     // 重複組み合わせ表を生成（連番表記）
-    let tableMainOutputs = generateCombinationsWithRepetitionArray(equipKindsCounts, slotNum);
+    let serialCombiArray = generateCombinationsWithRepetitionArray(equipKindsCounts, slotNum);
     // 各No.の装備の上下限でフィルタリング
-    tableMainOutputs = filterByLimits(tableMainOutputs, mainInputs);
+    serialCombiArray = filterByLimits(serialCombiArray, mainInputs);
+
+    // 装備名表記に変換
+    let equipNameCombiArray = convertSerialToEquipNames(serialCombiArray, mainInputs);
+    let tableMainOutputs = equipNameCombiArray; // 装備名表記に直してからメインの出力表へ
     // 列名を追加
     let tableMainOutputsHeader = [];
     for(let i = 0; i < slotNum; i++){
       tableMainOutputsHeader.push(`装備${i + 1}`);
     }
 
-    // 装備名表記に変換
-    const equipNamesCombinations = convertSerialToEquipNames(tableMainOutputs, mainInputs);
-    tableMainOutputs = appendColumns(tableMainOutputs, equipNamesCombinations);
-    // 列名を追加
-    for(let i = 0; i < slotNum; i++){
-      tableMainOutputsHeader.push(`装備${i + 1}`);
+    // 各行について
+    for(let i = 0; i < serialCombiArray.length; i++) {
+      let row = serialCombiArray[i];
+      let tempEquipCounts = {};
+      let tempImpCounts = {};
+      for(let j = 0; j < row.length; j++) {
+        let equipSerial = row[j];
+        let equipName = mainInputs[equipSerial].nameB;
+        let equipImp = mainInputs[equipSerial].imp;
+        tempEquipCounts[equipName] = (tempEquipCounts[equipName] || 0) + 1; // 装備の出現回数をカウント
+        tempImpCounts[equipName] = (tempImpCounts[equipName] || 0) + equipImp; // 改修の合計値をカウント
+      }
+      // 補正値算出で使う形に変換
+      let equipCounts = {};
+      let impCounts = {};
+      // メイン乗算補正
+      addGroupCount(equipCounts, tempEquipCounts, "三式弾Gr", ["三式弾", "三式弾改", "三式弾改二"]);
+      addGroupCount(equipCounts, tempEquipCounts, "徹甲弾Gr", ["九一徹甲", "一式徹甲", "一式徹甲改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "WG", ["WG"]);
+      addGroupCount(equipCounts, tempEquipCounts, "四式噴進Gr", ["四式噴進", "四式噴進集中"]);
+      addGroupCount(equipCounts, tempEquipCounts, "二式迫撃Gr", ["二式迫撃", "二式迫撃集中"]);
+        // 上陸用舟艇関係
+      addGroupCount(equipCounts, tempEquipCounts, "上陸用舟艇&特四&陸戦部隊Gr", ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
+      addGroupCount(impCounts, tempImpCounts, "上陸用舟艇&特四&陸戦部隊Gr", ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "特大発Gr", ["特大発", "3号アフリカ", "3号J型", "歩兵", "歩兵チハ改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "M4A1Gr", ["M4A1", "チハ改", "3号J型", "チハ改戦車", "歩兵チハ改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "陸戦隊Gr1", ["陸戦隊", "ホニ", "3号アフリカ", "3号J型", "歩兵", "歩兵チハ改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "陸戦隊Gr2", ["陸戦隊", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
+      addGroupCount(equipCounts, tempEquipCounts, "2号アフリカ", ["2号アフリカ"]);
+      addGroupCount(equipCounts, tempEquipCounts, "装甲艇&武装大発Gr", ["装甲艇", "武装大発"]);
+      // 特四が絡んでくるが一旦後で
+        // 内火艇関係
+      addGroupCount(equipCounts, tempEquipCounts, "特二内火", ["特二内火"]);
+      addGroupCount(impCounts, tempImpCounts, "特二内火", ["特二内火"]);
+      // 特四改は一旦後で
+        // 陸戦部隊関係
+      addGroupCount(equipCounts, tempEquipCounts, "陸戦部隊Gr", ["歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
+        // 航空機関係
+      addGroupCount(equipCounts, tempEquipCounts, "水戦/爆", ["水戦/爆"]);
+      addGroupCount(equipCounts, tempEquipCounts, "艦爆", ["艦爆"]);
+
+      // 特殊大発系の共通追加補正
+      addGroupCount(equipCounts, tempEquipCounts, "士魂Gr", ["士魂", "ホニ", "3号アフリカ", "3号J型"]); // No.1
+      addGroupCount(equipCounts, tempEquipCounts, "M4A1", ["M4A1"]); // No.2
+      addGroupCount(equipCounts, tempEquipCounts, "ホニ", ["ホニ"]); // No.3
+      addGroupCount(equipCounts, tempEquipCounts, "チハ", ["チハ"]); // No.4
+      addGroupCount(equipCounts, tempEquipCounts, "チハ改", ["チハ改"]); // No.5
+      addGroupCount(equipCounts, tempEquipCounts, "歩兵Gr", ["歩兵", "歩兵チハ改"]); // No.6
+      addGroupCount(equipCounts, tempEquipCounts, "チハ戦車Gr", ["チハ戦車", "チハ改戦車"]); // No.7
+      addGroupCount(equipCounts, tempEquipCounts, "チハ改戦車", ["チハ改戦車"]); // No.8
+      addGroupCount(equipCounts, tempEquipCounts, "歩兵チハ改", ["歩兵チハ改"]); // No.9
+      // No.10～13
+      // ベースの陸戦部隊はメイン乗算補正の方でカウント済み
+      addGroupCount(equipCounts, tempEquipCounts, "内火&歩兵&チハ戦車Gr", ["特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車"]); // No.11
+      addGroupCount(equipCounts, tempEquipCounts, "特四内火", ["特四内火"]); // No.12
+      addGroupCount(equipCounts, tempEquipCounts, "特四内火改", ["特四内火改"]); // No.13
+      addGroupCount(equipCounts, tempEquipCounts, "特四内火Gr", ["特四内火", "特四内火改"]); // No.14
+      // No.15はNo.13でカウント済み
+
+      // 大発系シナジー補正
+      addGroupCount(equipCounts, tempEquipCounts, "武装大発", ["武装大発"]); // Aグループ
+      addGroupCount(equipCounts, tempEquipCounts, "装甲艇", ["装甲艇"]); // Bグループ
+      addGroupCount(equipCounts, tempEquipCounts, "シナジーCGr", ["大発", "陸戦隊", "特大発", "2号アフリカ", "ホニ", "3号J型", "特四内火", "特四内火改"]); // Cグループ
+      addGroupCount(equipCounts, tempEquipCounts, "シナジーDGr", ["士魂", "3号アフリカ", "チハ", "チハ改", "3号J型", "特二内火"]); // Dグループ
+
+      // メイン加算補正
+      // WGはメイン乗算補正でカウント済み
+      addGroupCount(equipCounts, tempEquipCounts, "四式噴進", ["四式噴進"]);
+      addGroupCount(equipCounts, tempEquipCounts, "四式噴進集中", ["四式噴進集中"]);
+      addGroupCount(equipCounts, tempEquipCounts, "二式迫撃", ["二式迫撃"]);
+      addGroupCount(equipCounts, tempEquipCounts, "二式迫撃集中", ["二式迫撃集中"]);
+
+      // キャップ後乗算補正
+      // 三式弾Grはメイン乗算補正でカウント済み
+      // WGはメイン乗算補正でカウント済み
+      // 四式噴進Grはメイン乗算補正でカウント済み
+      // 二式迫撃Grはメイン乗算補正でカウント済み
+        // 上陸用舟艇関係
+        // 内火艇関係
+        // 陸戦部隊関係
+        // 艦爆&噴式機関係
+
+      // addGroupCount(equipCounts, tempEquipCounts, "", []);
+      console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, tempImpCounts);
+      console.log(`main_Row ${i + 1}:`, row, equipCounts, impCounts);
     }
+
+
+
 
     // 連番を追加
     for(let i = 0; i < tableMainOutputs.length; i++){
@@ -41,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 計算結果の表を表示
     tableMainOutputs.unshift(tableMainOutputsHeader);
-    var container = document.getElementById("tableMainOutputs");
+    let container = document.getElementById("tableMainOutputs");
     container.innerHTML = ""; // ここで以前の表を削除！
     container.appendChild(createTable(tableMainOutputs));
   });
@@ -67,12 +153,12 @@ function getTableInputsData() {
   for (let i = 1; i < rows.length; i++) {
     const cells = rows[i].querySelectorAll("td");
 
-    var serial = cells[0].querySelector("input").value;
-    var nameA = cells[1].querySelector("input").value;
-    var nameB = cells[2].querySelector("select").value;
-    var imp = parseInt(cells[3].querySelector("input").value, 10);
-    var min = parseInt(cells[4].querySelector("input").value, 10);
-    var max = parseInt(cells[5].querySelector("input").value, 10);
+    let serial = cells[0].querySelector("input").value;
+    let nameA = cells[1].querySelector("input").value;
+    let nameB = cells[2].querySelector("select").value;
+    let imp = parseInt(cells[3].querySelector("input").value, 10);
+    let min = parseInt(cells[4].querySelector("input").value, 10);
+    let max = parseInt(cells[5].querySelector("input").value, 10);
 
     result[serial] = { nameA, nameB, imp, min, max };
   }
@@ -121,8 +207,8 @@ function convertSerialToEquipNames(array, mainInputs) {
   for(let i =0; i < array.length; i++) {
     let row = [];
     for(let j = 0; j < array[i].length; j++ ) {
-      var equipSerial = array[i][j];
-      var equipName = mainInputs[equipSerial].nameA;
+      let equipSerial = array[i][j];
+      let equipName = mainInputs[equipSerial].nameA;
       row.push(equipName);
     }
     result.push(row);
@@ -158,4 +244,24 @@ function filterByLimits(serialNumberArray, mainInputs) {
     }
   }
   return result;
+}
+
+// とりあえずで定数定義してみる。乗算加算両方あるとこはリストの中要素増やしていくイメージ
+const paramsBasicBonusA = {
+  "ソフトスキン型": {
+    "三式弾Gr": {"a": [2.5]},
+    "WG": {"a": [1.3, 1.82]}
+  },
+  "砲台型": {
+    "徹甲弾Gr": {"a": [1.85]}
+  }
+}
+
+// グループの合計値を計算して追加
+// target: 出力先のオブジェクト, source: 入力元のオブジェクト, groupName: グループ名, keys: 対象のキーのリスト
+function addGroupCount(target, source, groupName, keys) {
+  const total = keys.reduce((sum, key) => sum + (source[key] || 0), 0);
+  if (total > 0) {
+    target[groupName] = total;
+  }
 }
