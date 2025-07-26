@@ -29,11 +29,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tableMainOutputsHeader.push(`装備${i + 1}`);
     }
 
+    let modList = [];
     // 各行について
     for(let i = 0; i < serialCombiArray.length; i++) {
       let row = serialCombiArray[i];
       let tempEquipCounts = {};
       let tempImpCounts = {};
+      let modListRow = [];
       for(let j = 0; j < row.length; j++) {
         let equipSerial = row[j];
         let equipName = mainInputs[equipSerial].nameB;
@@ -143,10 +145,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       // デバッグ用出力
       console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, equipCounts, impModLandingCraftGroup, impModTokuNiGroup);
+
+      // 補正値算出
+      // メイン乗算補正
+      if (i === 0) tableMainOutputsHeader.push("メイン乗算");
+      let mod = 1;
+      // ここに種々の補正を掛けていく処理を入れる
+      modListRow.push(mod);
+
+      // 補正まとめ処理とunshiftをここら辺？
+
+      // 全補正push
+      modList.push(modListRow);
     }
-
-
-
+    // メイン出力表に追加
+    tableMainOutputs = appendColumns(tableMainOutputs, modList);
 
     // 連番を追加
     for(let i = 0; i < tableMainOutputs.length; i++){
@@ -293,14 +306,4 @@ function addGroupCount(target, source, groupName, keys) {
   if (total > 0) {
     target[groupName] = total;
   }
-}
-
-// 改修値の合計値を計算して追加
-// target: 出力先のオブジェクト, source: 入力元のオbject, groupName: グループ名, keys: 対象のキーのリスト
-function addGroupImpCount(target, source, groupName, keys) {
-  const hasHit = keys.some(key => source[key] !== undefined);
-  if (!hasHit) return;
-
-  const total = keys.reduce((sum, key) => sum + (source[key] || 0), 0);
-  target[groupName] = total;
 }
