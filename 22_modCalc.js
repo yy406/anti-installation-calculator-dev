@@ -43,7 +43,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       // 補正値算出で使う形に変換
       let equipCounts = {};
-      let impCounts = {};
+      // 改修補正値は先に準備
+      let listOfLandingCraftGroup = ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型"];
+      let countsLandingCraftGroup = listOfLandingCraftGroup.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      let impLandingCraftGroup = listOfLandingCraftGroup.reduce((sum, key) => sum + (tempImpCounts[key] || 0), 0);
+      let listOfTokuYonGroup = ["特四内火", "特四内火改"];
+      let countsTokuYonGroup = listOfTokuYonGroup.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      let impTokuYonGroup = listOfTokuYonGroup.reduce((sum, key) => sum + (tempImpCounts[key] || 0), 0);
+      let impModLandingCraftGroup = 1 + (countsLandingCraftGroup ? impLandingCraftGroup / countsLandingCraftGroup / 50 : 0) + (countsTokuYonGroup ? impTokuYonGroup / countsTokuYonGroup / 50 : 0);
+      let listOfTokuNiGroup = ["特二内火"];
+      let countsTokuNiGroup = listOfTokuNiGroup.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      let impTokuNiGroup = listOfTokuNiGroup.reduce((sum, key) => sum + (tempImpCounts[key] || 0), 0);
+      let impModTokuNiGroup = 1 + (countsTokuNiGroup ? impTokuNiGroup / countsTokuNiGroup / 30 : 0);
       // メイン乗算補正
       addGroupCount(equipCounts, tempEquipCounts, "三式弾Gr", ["三式弾", "三式弾改", "三式弾改二"]);
       addGroupCount(equipCounts, tempEquipCounts, "徹甲弾Gr", ["九一徹甲", "一式徹甲", "一式徹甲改"]);
@@ -52,18 +63,24 @@ document.addEventListener("DOMContentLoaded", () => {
       addGroupCount(equipCounts, tempEquipCounts, "二式迫撃Gr", ["二式迫撃", "二式迫撃集中"]);
         // 上陸用舟艇関係
       addGroupCount(equipCounts, tempEquipCounts, "上陸用舟艇&特四&陸戦部隊Gr", ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
-      addGroupCount(impCounts, tempImpCounts, "上陸用舟艇&特四&陸戦部隊Gr", ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "特大発Gr", ["特大発", "3号アフリカ", "3号J型", "歩兵", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "M4A1Gr", ["M4A1", "チハ改", "3号J型", "チハ改戦車", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "陸戦隊Gr1", ["陸戦隊", "ホニ", "3号アフリカ", "3号J型", "歩兵", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "陸戦隊Gr2", ["陸戦隊", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "2号アフリカ", ["2号アフリカ"]);
       addGroupCount(equipCounts, tempEquipCounts, "装甲艇&武装大発Gr", ["装甲艇", "武装大発"]);
-      // 特四が絡んでくるが一旦後で
+      addGroupCount(equipCounts, tempEquipCounts, "特四内火Gr", ["特四内火", "特四内火改"]); // 特殊大発系の共通追加補正のNo.14でも使う
+      let total = Math.max(equipCounts["装甲艇&武装大発Gr"] || 0, equipCounts["特四内火Gr"] || 0);
+      if (total > 0) {
+        equipCounts["装甲艇&武装大発or特四内火Gr"] = total;
+      }
         // 内火艇関係
       addGroupCount(equipCounts, tempEquipCounts, "特二内火", ["特二内火"]);
-      addGroupCount(impCounts, tempImpCounts, "特二内火", ["特二内火"]);
-      // 特四改は一旦後で
+      addGroupCount(equipCounts, tempEquipCounts, "特四内火改", ["特四内火改"]); // 特殊大発系の共通追加補正のNo.13,15でも使う
+      total = Math.max(equipCounts["特二内火"] || 0, equipCounts["特四内火改"] * 2 || 0);
+      if (total > 0) {
+        equipCounts["特二内火or特四内火改*2Gr"] = total;
+      }
         // 陸戦部隊関係
       addGroupCount(equipCounts, tempEquipCounts, "陸戦部隊Gr", ["歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
         // 航空機関係
@@ -84,8 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // ベースの陸戦部隊はメイン乗算補正の方でカウント済み
       addGroupCount(equipCounts, tempEquipCounts, "内火&歩兵&チハ戦車Gr", ["特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車"]); // No.11
       addGroupCount(equipCounts, tempEquipCounts, "特四内火", ["特四内火"]); // No.12
-      addGroupCount(equipCounts, tempEquipCounts, "特四内火改", ["特四内火改"]); // No.13
-      addGroupCount(equipCounts, tempEquipCounts, "特四内火Gr", ["特四内火", "特四内火改"]); // No.14
+      // No.13はメイン乗算補正の方でカウント済み
+      // No.14はメイン乗算補正の方でカウント済み
       // No.15はNo.13でカウント済み
 
       // 大発系シナジー補正
@@ -107,13 +124,25 @@ document.addEventListener("DOMContentLoaded", () => {
       // 四式噴進Grはメイン乗算補正でカウント済み
       // 二式迫撃Grはメイン乗算補正でカウント済み
         // 上陸用舟艇関係
-        // 内火艇関係
-        // 陸戦部隊関係
+        // 上陸用舟艇&特四&陸戦部隊Grはメイン乗算補正でカウント済み
+        // 特大発Grはメイン乗算補正でカウント済み
+        // M4A1Grはメイン乗算補正でカウント済み
+        // 陸戦隊Gr1,2はメイン乗算補正でカウント済み
+      addGroupCount(equipCounts, tempEquipCounts, "士魂Gr&歩兵Gr", ["士魂", "ホニ", "3号アフリカ", "3号J型", "歩兵", "歩兵チハ改"]);
+        // 2号アフリカはメイン乗算補正でカウント済み
+        // 装甲艇&武装大発Grはメイン乗算補正でカウント済み
+        // 装甲艇&武装大発or特四内火Grはメイン乗算補正でカウント済み
+        // 内火艇関係はメイン乗算補正でカウント済み
+        // 陸戦部隊関係はメイン乗算補正でカウント済み
         // 艦爆&噴式機関係
-
-      // addGroupCount(equipCounts, tempEquipCounts, "", []);
-      console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, tempImpCounts);
-      console.log(`main_Row ${i + 1}:`, row, equipCounts, impCounts);
+        // 水戦/爆はメイン乗算補正でカウント済み
+      addGroupCount(equipCounts, tempEquipCounts, "艦爆&噴式機Gr", ["艦爆", "噴式機"]);
+      total = Math.max(tempEquipCounts["艦爆"] || 0, tempEquipCounts["噴式機"] * 2 || 0);
+      if(total > 0) {
+        equipCounts["艦爆&噴式機Gr2"] = total;
+      }
+      // デバッグ用出力
+      console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, equipCounts, impModLandingCraftGroup, impModTokuNiGroup);
     }
 
 
@@ -264,4 +293,14 @@ function addGroupCount(target, source, groupName, keys) {
   if (total > 0) {
     target[groupName] = total;
   }
+}
+
+// 改修値の合計値を計算して追加
+// target: 出力先のオブジェクト, source: 入力元のオbject, groupName: グループ名, keys: 対象のキーのリスト
+function addGroupImpCount(target, source, groupName, keys) {
+  const hasHit = keys.some(key => source[key] !== undefined);
+  if (!hasHit) return;
+
+  const total = keys.reduce((sum, key) => sum + (source[key] || 0), 0);
+  target[groupName] = total;
 }
