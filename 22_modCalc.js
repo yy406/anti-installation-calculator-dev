@@ -1,4 +1,5 @@
 // 22_modCalc.js
+const enemyModType = "ソフトスキン型"
 
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
@@ -10,10 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mainInputs[0] = { nameA: "なし", nameB: "なし", imp: 0, min: 0, max: slotNum };
     // 装備種類数を取得
     const equipKindsCounts = Object.keys(mainInputs).length;
-
-    // 結果出力用の表を生成（No.、連番）※将来的にはソート後に付け加えるイメージ
-    // let mainOutputsTable = [["No."]];
-    // for(let i = 0; i < combinationsWithRepetition(equipKindsCounts, slotNum); i++){mainOutputsTable.push([i+1]);}
 
     // 重複組み合わせ表を生成（連番表記）
     let serialCombiArray = generateCombinationsWithRepetitionArray(equipKindsCounts, slotNum);
@@ -29,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tableMainOutputsHeader.push(`装備${i + 1}`);
     }
 
+    // 補正値関係
     let modList = [];
     // 各行について
     for(let i = 0; i < serialCombiArray.length; i++) {
@@ -144,12 +142,19 @@ document.addEventListener("DOMContentLoaded", () => {
         equipCounts["艦爆&噴式機Gr2"] = total;
       }
       // デバッグ用出力
-      console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, equipCounts, impModLandingCraftGroup, impModTokuNiGroup);
+      // console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, equipCounts, impModLandingCraftGroup, impModTokuNiGroup);
 
       // 補正値算出
       // メイン乗算補正
       if (i === 0) tableMainOutputsHeader.push("メイン乗算");
       let mod = 1;
+      for (const [key, value] of Object.entries(equipCounts)) {
+        let paramList = paramsBasicBonusA[enemyModType]?.[key] ?? [1];
+        let index = Math.min(value, paramList.length) - 1;
+        let param = paramList[index];
+        mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
+      }
+
       // ここに種々の補正を掛けていく処理を入れる
       modListRow.push(mod);
 
@@ -288,17 +293,6 @@ function filterByLimits(serialNumberArray, mainInputs) {
   return result;
 }
 
-// とりあえずで定数定義してみる。乗算加算両方あるとこはリストの中要素増やしていくイメージ
-const paramsBasicBonusA = {
-  "ソフトスキン型": {
-    "三式弾Gr": {"a": [2.5]},
-    "WG": {"a": [1.3, 1.82]}
-  },
-  "砲台型": {
-    "徹甲弾Gr": {"a": [1.85]}
-  }
-}
-
 // グループの合計値を計算して追加
 // target: 出力先のオブジェクト, source: 入力元のオブジェクト, groupName: グループ名, keys: 対象のキーのリスト
 function addGroupCount(target, source, groupName, keys) {
@@ -307,3 +301,86 @@ function addGroupCount(target, source, groupName, keys) {
     target[groupName] = total;
   }
 }
+
+// とりあえずで定数定義してみる。乗算加算両方あるとこはリストの中要素増やしていくイメージ
+const paramsBasicBonusASoftSkin = {
+    "三式弾Gr": [2.5],
+    "WG": [1.3, 1.3*1.4], 
+    "四式噴進Gr": [1.25, 1.25*1.5], 
+    "二式迫撃Gr": [1.2, 1.2*1.3], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.4 * imp], 
+    "特大発Gr": [1.15], 
+    "M4A1Gr": [1.1], 
+    "陸戦隊Gr1": [1.5], 
+    "陸戦隊Gr2": [1, 1.3], 
+    "2号アフリカ": [1.5, 1.5*1.3], 
+    "装甲艇&武装大発Gr": [1.1], // 昼のみの処理は後で考える
+    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
+    "特二内火": [(_, imp) => 1.5 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.2], 
+    "陸戦部隊Gr": [1.4, 1.4*1.2, 1.4*1.2*1.1], 
+    "水戦/爆": [1.2]
+  }
+const paramsBasicBonusA = {
+  "ソフトスキン型": paramsBasicBonusASoftSkin,
+  "集積地型": paramsBasicBonusASoftSkin,
+  "砲台型": {
+    "徹甲弾Gr": [1.85],
+    "WG": [1.6, 1.6*1.7], 
+    "四式噴進Gr": [1.5, 1.5*1.8], 
+    "二式迫撃Gr": [1.3, 1.3*1.5], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.8 * imp], 
+    "特大発Gr": [1.15], 
+    "M4A1Gr": [2], 
+    "陸戦隊Gr1": [1.5], 
+    "陸戦隊Gr2": [1, 1.4], 
+    "2号アフリカ": [1.5, 1.5*1.4], 
+    "装甲艇&武装大発Gr": [1.3], // 昼のみの処理は後で考える
+    "装甲艇&武装大発or特四内火Gr": [1, 1.2], // 昼のみの処理は後で考える
+    "特二内火": [(_, imp) => 2.4 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.35], 
+    "水戦/爆": [1.5], 
+    "艦爆": [1.5, 1.5*2]
+  },
+  "離島型": {
+    "三式弾Gr": [1.75],
+    "WG": [1.4, 1.4*1.5], 
+    "四式噴進Gr": [1.3, 1.3*1.65], 
+    "二式迫撃Gr": [1.2, 1.2*1.4], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.8 * imp], 
+    "特大発Gr": [1.15], 
+    "M4A1Gr": [1.8], 
+    "陸戦隊Gr1": [1.2], 
+    "陸戦隊Gr2": [1, 1.4], 
+    "2号アフリカ": [1.2, 1.2*1.4], 
+    "装甲艇&武装大発Gr": [1.3], // 昼のみの処理は後で考える
+    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
+    "特二内火": [(_, imp) => 2.4 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.35], 
+    "艦爆": [1.4, 1.4*1.75]
+  },
+  "港湾夏姫型": {
+    "三式弾Gr": [1.75],
+    "徹甲弾Gr": [1.3],
+    "WG": [1.4, 1.4*1.2], 
+    "四式噴進Gr": [1.25, 1.25*1.4], 
+    "二式迫撃Gr": [1.1, 1.1*1.15], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.7 * imp], 
+    "特大発Gr": [1.2], 
+    "M4A1Gr": [2], 
+    "陸戦隊Gr1": [1.6], 
+    "陸戦隊Gr2": [1, 1.5], 
+    "2号アフリカ": [1.6, 1.6*1.5], 
+    "装甲艇&武装大発Gr": [1.5], // 昼のみの処理は後で考える
+    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
+    "特二内火": [(_, imp) => 2.8 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.5], 
+    "水戦/爆": [1.3], 
+    "艦爆": [1.3, 1.3*1.2]
+  }
+}
+
+
+
+
+
