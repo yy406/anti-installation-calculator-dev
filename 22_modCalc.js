@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       // 補正値算出で使う形に変換
       let equipCounts = {};
+      let modFlags = {};
       // 改修補正値は先に準備
       let listOfLandingCraftGroup = ["大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型"];
       let countsLandingCraftGroup = listOfLandingCraftGroup.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
@@ -69,15 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
       addGroupCount(equipCounts, tempEquipCounts, "陸戦隊Gr2", ["陸戦隊", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改"]);
       addGroupCount(equipCounts, tempEquipCounts, "2号アフリカ", ["2号アフリカ"]);
       addGroupCount(equipCounts, tempEquipCounts, "装甲艇&武装大発Gr", ["装甲艇", "武装大発"]);
-      addGroupCount(equipCounts, tempEquipCounts, "特四内火Gr", ["特四内火", "特四内火改"]); // 特殊大発系の共通追加補正のNo.14でも使う
-      let total = Math.max(equipCounts["装甲艇&武装大発Gr"] || 0, equipCounts["特四内火Gr"] || 0);
+      let total = Math.max(equipCounts["装甲艇&武装大発Gr"] || 0, ["特四内火", "特四内火改"].reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0));
       if (total > 0) {
         equipCounts["装甲艇&武装大発or特四内火Gr"] = total;
       }
         // 内火艇関係
       addGroupCount(equipCounts, tempEquipCounts, "特二内火", ["特二内火"]);
-      addGroupCount(equipCounts, tempEquipCounts, "特四内火改", ["特四内火改"]); // 特殊大発系の共通追加補正のNo.13,15でも使う
-      total = Math.max(equipCounts["特二内火"] || 0, equipCounts["特四内火改"] * 2 || 0);
+      total = Math.max(equipCounts["特二内火"] || 0, ["特四内火改"].reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) * 2);
       if (total > 0) {
         equipCounts["特二内火or特四内火改*2Gr"] = total;
       }
@@ -88,28 +87,49 @@ document.addEventListener("DOMContentLoaded", () => {
       addGroupCount(equipCounts, tempEquipCounts, "艦爆", ["艦爆"]);
 
       // 特殊大発系の共通追加補正
-      addGroupCount(equipCounts, tempEquipCounts, "士魂Gr", ["士魂", "ホニ", "3号アフリカ", "3号J型"]); // No.1
-      addGroupCount(equipCounts, tempEquipCounts, "M4A1", ["M4A1"]); // No.2
-      addGroupCount(equipCounts, tempEquipCounts, "ホニ", ["ホニ"]); // No.3
-      addGroupCount(equipCounts, tempEquipCounts, "チハ", ["チハ"]); // No.4
-      addGroupCount(equipCounts, tempEquipCounts, "チハ改", ["チハ改"]); // No.5
-      addGroupCount(equipCounts, tempEquipCounts, "歩兵Gr", ["歩兵", "歩兵チハ改"]); // No.6
-      addGroupCount(equipCounts, tempEquipCounts, "チハ戦車Gr", ["チハ戦車", "チハ改戦車"]); // No.7
-      addGroupCount(equipCounts, tempEquipCounts, "チハ改戦車", ["チハ改戦車"]); // No.8
-      addGroupCount(equipCounts, tempEquipCounts, "歩兵チハ改", ["歩兵チハ改"]); // No.9
-      // No.10～13
-      // ベースの陸戦部隊はメイン乗算補正の方でカウント済み
-      addGroupCount(equipCounts, tempEquipCounts, "内火&歩兵&チハ戦車Gr", ["特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車"]); // No.11
-      addGroupCount(equipCounts, tempEquipCounts, "特四内火", ["特四内火"]); // No.12
-      // No.13はメイン乗算補正の方でカウント済み
-      // No.14はメイン乗算補正の方でカウント済み
-      // No.15はNo.13でカウント済み
+      keys = ["士魂", "ホニ", "3号アフリカ", "3号J型"]; // No.1
+      modFlags["士魂Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["M4A1"]; // No.2
+      modFlags["M4A1"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["ホニ"]; // No.3
+      modFlags["ホニ"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["チハ"]; // No.4
+      modFlags["チハ"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["チハ改"]; // No.5
+      modFlags["チハ改"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["歩兵", "歩兵チハ改"]; // No.6
+      modFlags["歩兵Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["チハ戦車", "チハ改戦車"]; // No.7
+      modFlags["チハ戦車Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["チハ改戦車"]; // No.8
+      modFlags["チハ改戦車"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["歩兵チハ改"]; // No.9、No.11でも使う
+      modFlags["歩兵チハ改"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      modFlags["陸戦部隊Gr"] = equipCounts["陸戦部隊Gr"] ?? 0 >= 2 ? true : false; // No.10、メイン乗算補正の方でカウント済み
+      keys = ["特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車"]; // No.11
+      modFlags["陸戦部隊&歩兵チハ改&内火&歩兵&チハ戦車Gr"] = modFlags["陸戦部隊Gr"] && (modFlags["歩兵チハ改"] || keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 3) ? true : false;
+      keys = ["特四内火"]; // No.12
+      modFlags["陸戦部隊&特四内火"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["特四内火改"]; // No.13
+      modFlags["陸戦部隊&特四内火改"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["特四内火", "特四内火改"]; // No.14
+      modFlags["特四Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      keys = ["特四内火改"]; // No.15
+      modFlags["特四内火改"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
 
       // 大発系シナジー補正
-      addGroupCount(equipCounts, tempEquipCounts, "武装大発", ["武装大発"]); // Aグループ
-      addGroupCount(equipCounts, tempEquipCounts, "装甲艇", ["装甲艇"]); // Bグループ
-      addGroupCount(equipCounts, tempEquipCounts, "シナジーCGr", ["大発", "陸戦隊", "特大発", "2号アフリカ", "ホニ", "3号J型", "特四内火", "特四内火改"]); // Cグループ
-      addGroupCount(equipCounts, tempEquipCounts, "シナジーDGr", ["士魂", "3号アフリカ", "チハ", "チハ改", "3号J型", "特二内火"]); // Dグループ
+      keys = ["武装大発"];
+      let synergyGroupA = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      keys = ["装甲艇"];
+      let synergyGroupB = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      keys = ["大発", "陸戦隊", "特大発", "2号アフリカ", "ホニ", "3号J型", "特四内火", "特四内火改"];
+      let synergyGroupC = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      keys = ["士魂", "3号アフリカ", "チハ", "チハ改", "3号J型", "特二内火"];
+      let synergyGroupD = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0);
+      modFlags["シナジー1"] = (synergyGroupA + synergyGroupB == 1) && (synergyGroupC + synergyGroupD >= 1) ? true : false;
+      modFlags["シナジー2"] = synergyGroupA >= 1 && synergyGroupB >= 1 && synergyGroupC == 1 && synergyGroupD == 0 ? true : false;
+      modFlags["シナジー3"] = synergyGroupA >= 1 && synergyGroupB >= 1 && synergyGroupC == 0 && synergyGroupD == 1 ? true : false;
+      modFlags["シナジー4"] = synergyGroupA >= 1 && synergyGroupB >= 1 && (synergyGroupC + synergyGroupD >= 2) ? true : false;
 
       // メイン加算補正
       // WGはメイン乗算補正でカウント済み
@@ -302,7 +322,8 @@ function addGroupCount(target, source, groupName, keys) {
   }
 }
 
-// とりあえずで定数定義してみる。乗算加算両方あるとこはリストの中要素増やしていくイメージ
+// メイン乗算補正（個数ごとのリスト）
+// ソフトスキン型、集積地型共通補正
 const paramsBasicBonusASoftSkin = {
     "三式弾Gr": [2.5],
     "WG": [1.3, 1.3*1.4], 
@@ -380,7 +401,56 @@ const paramsBasicBonusA = {
   }
 }
 
+// 特殊大発系追加補正（乗算と加算のリスト）
+const paramsSpecialBonus = {
+  "士魂Gr": [1.8, 25], // No.1
+  "M4A1": [1.4, 35], // No.2
+  "ホニ": [1.3, 42], // No.3
+  "チハ": [1.4, 28], // No.4
+  "チハ改": [1.5, 33], // No.5
+  "歩兵Gr": [1.2, 60], // No.6
+  "チハ戦車Gr": [1.5, 70], // No.7
+  "チハ改戦車": [1.5, 50], // No.8
+  "歩兵チハ改": [1.6, 70], // No.9
+  "陸戦部隊Gr": [2, 100], // No.10
+  "陸戦部隊&歩兵チハ改&内火&歩兵&チハ戦車Gr": [3, 150], // No.11
+  "陸戦部隊&特四内火": [1, 100], // No.12
+  "陸戦部隊&特四内火改": [1, 172], // No.13
+  "特四Gr": [1.2, 42], // No.14
+  "特四内火改": [1.1, 28], // No.15
+}
 
+// 大発系シナジー補正（乗算と加算のリスト）
+const paramsSynergyBonus = {
+  "シナジー1": [1.2, 10], 
+  "シナジー2": [1.3, 15], 
+  "シナジー3": [1.4, 20], 
+  "シナジー4": [1.5, 25]
+}
 
+// メイン加算補正（個数ごとのリスト）
+const paramsBasicBonusB = {
+  "WG": [75, 110, 140, 160], 
+  "四式噴進": [55, 115, 160, 190], 
+  "四式噴進集中": [80, 170, 230, 260], 
+  "二式迫撃": [30, 55, 75, 90], 
+  "二式迫撃集中": [60, 110, 150, 180], 
+}
 
-
+// キャップ後乗算補正（個数ごとのリスト）
+// 集積地型、新集積地型共通補正
+const paramsPostCapBonusSupplyDepotPrincess = {
+  "WG": [1.25, 1.25*1.3], 
+  "四式噴進Gr": [1.2, 1.2*1.4],
+  "二式迫撃Gr": [1.15, 1.15*1.2],
+}
+const paramsPostCapBonus = {
+  "集積地型": paramsPostCapBonusSupplyDepotPrincess,
+  "新集積地型": paramsPostCapBonusSupplyDepotPrincess, 
+  "泊地vac型": {
+    "WG": [], 
+  }, 
+  "船渠型": {
+    "WG": [], 
+  }
+}
