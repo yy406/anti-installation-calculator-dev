@@ -34,6 +34,30 @@
             </div>
             <div id="tableMainInputs"></div>
             <h3>攻撃力条件</h3>
+            <div>
+                <label for="inputEnemyType">敵艦タイプ：</label>
+                <select id="inputEnemyType">
+                    <option value="ソフトスキン型">ソフトスキン型</option>
+                    <option value="集積地型">集積地型</option>
+                    <option value="砲台型">砲台型</option>
+                    <option value="離島型">離島型</option>
+                    <option value="港湾夏姫型">港湾夏姫型</option>
+                    <option value="新集積地型">新集積地型</option>
+                    <option value="泊地vac型">泊地vac型</option>
+                    <option value="船渠型">船渠型</option>
+                </select>
+            </div>
+            <div>
+                <label for="inputBaseFirePower">基本攻撃力：</label>
+                <input
+                    type="number"
+                    id="inputBaseFirePower"
+                    value="60"
+                    min="0.0000001"
+                    step="any"
+                    oninput="(validity.valid && value > 0)||(value='');"
+                >
+            </div>
             <h3>攻撃力詳細条件</h3>
         </div>
 

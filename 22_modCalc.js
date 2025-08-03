@@ -1,12 +1,14 @@
 // 22_modCalc.js
-const enemyModType = "集積地型"
-const baseFirePower = 70; // 基本攻撃力換算補正用
+// const enemyModType = "ソフトスキン型"
+// const baseFirePower = 70; // 基本攻撃力換算補正用
 
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
   document.getElementById("buttonRunCalc").addEventListener("click", () => {
-    // スロット数と装備条件のデータを取得
+    // スロット数、装備条件、敵艦タイプ、基本攻撃力のデータを取得
     const slotNum = parseInt(document.getElementById("inputSlotNum").value, 10);
+    const enemyModType = document.getElementById("inputEnemyType").value;
+    const baseFirePower = parseInt(document.getElementById("inputBaseFirePower").value, 10);
     const mainInputs = getTableInputsData();
     // 「なし」を必ず追加、★平均値改修補正対策
     mainInputs[0] = { nameA: "なし", nameB: "なし", imp: 0, min: 0, max: slotNum };
@@ -29,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 補正値関係
     let modList = [];
+    let modHeaderList = [];
     // 各行について
     for(let i = 0; i < serialCombiArray.length; i++) {
       let row = serialCombiArray[i];
@@ -168,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // 補正値算出
       let conversionModValue = baseFirePower;
       // メイン乗算補正
-      if (i === 0) tableMainOutputsHeader.push("メイン乗算"); // 初回のみヘッダー入れる
+      if (i === 0) modHeaderList.push("メイン乗算"); // 初回のみヘッダー入れる
       let mod = 1;
       if (Object.keys(paramsBasicBonusA).includes(enemyModType)) {
         for (const [key, value] of Object.entries(equipCounts)) {
@@ -187,14 +190,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const values = bonus.values;
         if(modFlags[name]) {
           mod = values;
+          conversionModValue = conversionModValue * mod[0] + mod[1]; // 乗算と加算の処理
         }else {
           mod = [1, 0];
         }
         if(i == 0) {
-          tableMainOutputsHeader.push(name + "乗算"); // 初回のみヘッダー入れる
-          tableMainOutputsHeader.push(name + "加算"); // 初回のみヘッダー入れる
+          modHeaderList.push(name + "乗算"); // 初回のみヘッダー入れる
+          modHeaderList.push(name + "加算"); // 初回のみヘッダー入れる
         }
-        conversionModValue = conversionModValue * mod[0] + mod[1]; // 乗算と加算の処理
         modListRow.push(...mod);
       }
 
@@ -211,14 +214,14 @@ document.addEventListener("DOMContentLoaded", () => {
         mod = [1, 0];
       }
       if(i == 0) {
-        tableMainOutputsHeader.push("大発系シナジー乗算"); // 初回のみヘッダー入れる
-        tableMainOutputsHeader.push("大発系シナジー加算"); // 初回のみヘッダー入れる
+        modHeaderList.push("大発系シナジー乗算"); // 初回のみヘッダー入れる
+        modHeaderList.push("大発系シナジー加算"); // 初回のみヘッダー入れる
       }
       conversionModValue = conversionModValue * mod[0] + mod[1];
       modListRow.push(...mod);
 
       // メイン加算補正
-      if (i === 0) tableMainOutputsHeader.push("メイン加算"); // 初回のみヘッダー入れる
+      if (i === 0) modHeaderList.push("メイン加算"); // 初回のみヘッダー入れる
       mod = 0;
       for (const [key, value] of Object.entries(equipCounts)) {
         let paramList = paramsBasicBonusB[key] ?? [0];
@@ -230,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modListRow.push(mod);
 
       // キャップ後乗算補正
-      if (i === 0) tableMainOutputsHeader.push("キャップ後乗算"); // 初回のみヘッダー入れる
+      if (i === 0) modHeaderList.push("キャップ後乗算"); // 初回のみヘッダー入れる
       mod = 1;
       if (Object.keys(paramsPostCapBonus).includes(enemyModType)) {
         for (const [key, value] of Object.entries(equipCounts)) {
@@ -240,14 +243,21 @@ document.addEventListener("DOMContentLoaded", () => {
           mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
         }
       }
-      // conversionModValue *= mod;
       modListRow.push(mod);
 
-      // 補正まとめ処理とunshiftをここら辺？
+      // 換算補正処理
+      conversionModValue /= baseFirePower;
+      if (i === 0) modHeaderList.unshift("換算補正"); // 初回のみヘッダー入れる
+      modListRow.unshift(conversionModValue);
 
       // 全補正push
+      if (i === 0) tableMainOutputsHeader.push(...modHeaderList);
       modList.push(modListRow);
     }
+
+    // ソート実行
+    [tableMainOutputs, modList] = sortByModList(tableMainOutputs, modList);
+
     // メイン出力表に追加
     tableMainOutputs = appendColumns(tableMainOutputs, modList);
 
@@ -386,6 +396,36 @@ function addGroupCount(target, source, groupName, keys) {
     target[groupName] = total;
   }
 }
+
+// 補正値ソート
+function sortByModList(tableMainOutputs, modList) {
+  // table と mod をペアでまとめる
+  let combined = [];
+  for (let i = 0; i < tableMainOutputs.length; i++) {
+    combined.push([tableMainOutputs[i], modList[i]]);
+  }
+
+  // ソート（最終列 → 1列目 の優先順位、降順）
+  combined.sort(function(a, b) {
+    let aLast = a[1][a[1].length - 1];
+    let bLast = b[1][b[1].length - 1];
+    if (aLast !== bLast) {
+      return bLast - aLast; // 最終列で降順
+    }
+    return b[1][0] - a[1][0]; // 1列目で降順
+  });
+
+  // 並び替え後の table と mod を取り出す
+  let newTable = [];
+  let newMod = [];
+  for (let i = 0; i < combined.length; i++) {
+    newTable.push(combined[i][0]);
+    newMod.push(combined[i][1]);
+  }
+
+  return [newTable, newMod];
+}
+
 
 // メイン乗算補正（個数ごとのリスト）
 // ソフトスキン型、集積地型共通補正
