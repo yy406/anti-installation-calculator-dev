@@ -1,5 +1,6 @@
 // 22_modCalc.js
 const enemyModType = "ソフトスキン型"
+const baseFirePower = 70; // 基本攻撃力換算補正用
 
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
@@ -107,13 +108,13 @@ document.addEventListener("DOMContentLoaded", () => {
       modFlags["歩兵チハ改"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
       modFlags["陸戦部隊Gr"] = equipCounts["陸戦部隊Gr"] ?? 0 >= 2 ? true : false; // No.10、メイン乗算補正の方でカウント済み
       keys = ["特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車"]; // No.11
-      modFlags["陸戦部隊&歩兵チハ改&内火&歩兵&チハ戦車Gr"] = modFlags["陸戦部隊Gr"] && (modFlags["歩兵チハ改"] || keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 3) ? true : false;
+      modFlags["陸戦&内火Gr"] = modFlags["陸戦部隊Gr"] && (modFlags["歩兵チハ改"] || keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 3) ? true : false;
       keys = ["特四内火"]; // No.12
-      modFlags["陸戦部隊&特四内火"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      modFlags["陸戦&特四内火Gr"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
       keys = ["特四内火改"]; // No.13
-      modFlags["陸戦部隊&特四内火改"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      modFlags["陸戦&特四内火改Gr"] = modFlags["陸戦部隊Gr"] && keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
       keys = ["特四内火", "特四内火改"]; // No.14
-      modFlags["特四Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
+      modFlags["特四内火Gr"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
       keys = ["特四内火改"]; // No.15
       modFlags["特四内火改"] = keys.reduce((sum, key) => sum + (tempEquipCounts[key] || 0), 0) >= 1 ? true : false;
 
@@ -165,18 +166,37 @@ document.addEventListener("DOMContentLoaded", () => {
       // console.log(`temp_Row ${i + 1}:`, row, tempEquipCounts, equipCounts, impModLandingCraftGroup, impModTokuNiGroup);
 
       // 補正値算出
+      let conversionModValue = baseFirePower;
       // メイン乗算補正
-      if (i === 0) tableMainOutputsHeader.push("メイン乗算");
+      if (i === 0) tableMainOutputsHeader.push("メイン乗算"); // 初回のみヘッダー入れる
       let mod = 1;
-      for (const [key, value] of Object.entries(equipCounts)) {
-        let paramList = paramsBasicBonusA[enemyModType]?.[key] ?? [1];
-        let index = Math.min(value, paramList.length) - 1;
-        let param = paramList[index];
-        mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
+      if (Object.keys(paramsBasicBonusA).includes(enemyModType)) {
+        for (const [key, value] of Object.entries(equipCounts)) {
+          let paramList = paramsBasicBonusA[enemyModType]?.[key] ?? [1];
+          let index = Math.min(value, paramList.length) - 1;
+          let param = paramList[index];
+          mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
+        }
       }
-
-      // ここに種々の補正を掛けていく処理を入れる
+      conversionModValue *= mod;
       modListRow.push(mod);
+
+      // 特殊大発系補正
+      for (const bonus of paramsSpecialBonus) {
+        const name = bonus.name;
+        const values = bonus.values;
+        if(modFlags[name]) {
+          mod = values;
+        }else {
+          mod = [1, 0];
+        }
+        conversionModValue = conversionModValue * mod[0] + mod[1]; // 乗算と加算の処理
+        modListRow.push(...mod);
+        if(i == 0) {
+          tableMainOutputsHeader.push(name + "乗算"); // 初回のみヘッダー入れる
+          tableMainOutputsHeader.push(name + "加算"); // 初回のみヘッダー入れる
+        }
+      }
 
       // 補正まとめ処理とunshiftをここら辺？
 
@@ -402,23 +422,24 @@ const paramsBasicBonusA = {
 }
 
 // 特殊大発系追加補正（乗算と加算のリスト）
-const paramsSpecialBonus = {
-  "士魂Gr": [1.8, 25], // No.1
-  "M4A1": [1.4, 35], // No.2
-  "ホニ": [1.3, 42], // No.3
-  "チハ": [1.4, 28], // No.4
-  "チハ改": [1.5, 33], // No.5
-  "歩兵Gr": [1.2, 60], // No.6
-  "チハ戦車Gr": [1.5, 70], // No.7
-  "チハ改戦車": [1.5, 50], // No.8
-  "歩兵チハ改": [1.6, 70], // No.9
-  "陸戦部隊Gr": [2, 100], // No.10
-  "陸戦部隊&歩兵チハ改&内火&歩兵&チハ戦車Gr": [3, 150], // No.11
-  "陸戦部隊&特四内火": [1, 100], // No.12
-  "陸戦部隊&特四内火改": [1, 172], // No.13
-  "特四Gr": [1.2, 42], // No.14
-  "特四内火改": [1.1, 28], // No.15
-}
+const paramsSpecialBonus = [
+  { name: "士魂Gr", values: [1.8, 25] },       // No.1
+  { name: "M4A1", values: [1.4, 35] },         // No.2
+  { name: "ホニ", values: [1.3, 42] },         // No.3
+  { name: "チハ", values: [1.4, 28] },         // No.4
+  { name: "チハ改", values: [1.5, 33] },       // No.5
+  { name: "歩兵Gr", values: [1.2, 60] },      // No.6
+  { name: "チハ戦車Gr", values: [1.5, 70] },  // No.7
+  { name: "チハ改戦車", values: [1.5, 50] },  // No.8
+  { name: "歩兵チハ改", values: [1.6, 70] },  // No.9
+  { name: "陸戦部隊Gr", values: [2, 100] },  // No.10
+  { name: "陸戦&内火Gr", values: [3, 150] }, // No.11
+  { name: "陸戦&特四内火Gr", values: [1, 100] }, // No.12
+  { name: "陸戦&特四内火改Gr", values: [1, 172] }, // No.13
+  { name: "特四内火Gr", values: [1.2, 42] },  // No.14
+  { name: "特四内火改", values: [1.1, 28] }   // No.15
+];
+
 
 // 大発系シナジー補正（乗算と加算のリスト）
 const paramsSynergyBonus = {
