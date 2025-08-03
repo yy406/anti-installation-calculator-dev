@@ -190,13 +190,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }else {
           mod = [1, 0];
         }
-        conversionModValue = conversionModValue * mod[0] + mod[1]; // 乗算と加算の処理
-        modListRow.push(...mod);
         if(i == 0) {
           tableMainOutputsHeader.push(name + "乗算"); // 初回のみヘッダー入れる
           tableMainOutputsHeader.push(name + "加算"); // 初回のみヘッダー入れる
         }
+        conversionModValue = conversionModValue * mod[0] + mod[1]; // 乗算と加算の処理
+        modListRow.push(...mod);
       }
+
+      // 大発系シナジー補正
+      if(modFlags["シナジー1"]) {
+        mod = paramsSynergyBonus["シナジー1"];
+      }else if(modFlags["シナジー2"]) {
+        mod = paramsSynergyBonus["シナジー2"];
+      }else if(modFlags["シナジー3"]) {
+        mod = paramsSynergyBonus["シナジー3"];
+      }else if(modFlags["シナジー4"]) {
+        mod = paramsSynergyBonus["シナジー4"];
+      }else {
+        mod = [1, 0];
+      }
+      if(i == 0) {
+        tableMainOutputsHeader.push("大発系シナジー乗算"); // 初回のみヘッダー入れる
+        tableMainOutputsHeader.push("大発系シナジー加算"); // 初回のみヘッダー入れる
+      }
+      conversionModValue = conversionModValue * mod[0] + mod[1];
+      modListRow.push(...mod);
+
+      // メイン加算補正
+      if (i === 0) tableMainOutputsHeader.push("メイン加算"); // 初回のみヘッダー入れる
+      mod = 0;
+      for (const [key, value] of Object.entries(equipCounts)) {
+        let paramList = paramsBasicBonusB[key] ?? [0];
+        let index = Math.min(value, paramList.length) - 1;
+        let param = paramList[index];
+        mod += param;
+      }
+      conversionModValue += mod;
+      modListRow.push(mod);
+
+      // キャップ後乗算補正
 
       // 補正まとめ処理とunshiftをここら辺？
 
@@ -440,13 +473,12 @@ const paramsSpecialBonus = [
   { name: "特四内火改", values: [1.1, 28] }   // No.15
 ];
 
-
 // 大発系シナジー補正（乗算と加算のリスト）
 const paramsSynergyBonus = {
   "シナジー1": [1.2, 10], 
   "シナジー2": [1.3, 15], 
   "シナジー3": [1.4, 20], 
-  "シナジー4": [1.5, 25]
+  "シナジー4": [1.5, 25]  
 }
 
 // メイン加算補正（個数ごとのリスト）
