@@ -1,5 +1,5 @@
 // 22_modCalc.js
-const enemyModType = "ソフトスキン型"
+const enemyModType = "集積地型"
 const baseFirePower = 70; // 基本攻撃力換算補正用
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -230,6 +230,18 @@ document.addEventListener("DOMContentLoaded", () => {
       modListRow.push(mod);
 
       // キャップ後乗算補正
+      if (i === 0) tableMainOutputsHeader.push("キャップ後乗算"); // 初回のみヘッダー入れる
+      mod = 1;
+      if (Object.keys(paramsPostCapBonus).includes(enemyModType)) {
+        for (const [key, value] of Object.entries(equipCounts)) {
+          let paramList = paramsPostCapBonus[enemyModType]?.[key] ?? [1];
+          let index = Math.min(value, paramList.length) - 1;
+          let param = paramList[index];
+          mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
+        }
+      }
+      // conversionModValue *= mod;
+      modListRow.push(mod);
 
       // 補正まとめ処理とunshiftをここら辺？
 
@@ -496,14 +508,58 @@ const paramsPostCapBonusSupplyDepotPrincess = {
   "WG": [1.25, 1.25*1.3], 
   "四式噴進Gr": [1.2, 1.2*1.4],
   "二式迫撃Gr": [1.15, 1.15*1.2],
+  "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.7 * imp], 
+  "特大発Gr": [1.2], 
+  "M4A1Gr": [1.2], 
+  "陸戦隊Gr1": [(imp, _) => 1.3 * imp], 
+  "陸戦隊Gr2": [1, 1.6], 
+  "2号アフリカ": [(imp, _) => 1.3 * imp, (imp, _) => 1.3 * imp * 1.6], 
+  "装甲艇&武装大発Gr": [1.5], 
+  "装甲艇&武装大発or特四内火Gr": [1, 1.1], 
+  "特二内火": [(_, imp) => 1.7 * imp], 
+  "特二内火or特四内火改*2Gr": [1, 1.5], 
+  "陸戦部隊Gr": [1.85, 1.85*1.45, 1.85*1.45*1.2]
 }
 const paramsPostCapBonus = {
   "集積地型": paramsPostCapBonusSupplyDepotPrincess,
   "新集積地型": paramsPostCapBonusSupplyDepotPrincess, 
   "泊地vac型": {
-    "WG": [], 
+    "三式弾Gr": [1.45],
+    "WG": [1.2, 1.2*1.3], 
+    "四式噴進Gr": [1.15, 1.15*1.4],
+    "二式迫撃Gr": [1.1, 1.1*1.2],
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.4 * imp], 
+    "特大発Gr": [1.15], 
+    "M4A1Gr": [1.8], 
+    "陸戦隊Gr1": [1.2], 
+    "陸戦隊Gr2": [1, 1.4], 
+    "2号アフリカ": [1.2, 1.2*1.4], 
+    "装甲艇&武装大発Gr": [1.2], 
+    "装甲艇&武装大発or特四内火Gr": [1, 1.1], 
+    "特二内火": [(_, imp) => 2.4 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.35], 
+    // "陸戦部隊Gr": [1.85, 1.85*1.45, 1.85*1.45*1.2] 未検証、仮置き
+    "艦爆&噴式機Gr": [1.4],
+    "艦爆&噴式機Gr2": [1, 1.75]
   }, 
   "船渠型": {
-    "WG": [], 
+    "三式弾Gr": [1.3],
+    "WG": [1.1, 1.1*1.2], 
+    "四式噴進Gr": [1.1, 1.1*1.25],
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.1 * imp], 
+    "特大発Gr": [1.1], 
+    "M4A1Gr": [1.1], 
+    "陸戦隊Gr1": [1.15], 
+    "陸戦隊Gr2": [1, 1.15], 
+    "士魂Gr&歩兵Gr": [1.4], 
+    "2号アフリカ": [1.15, 1.15*1.15], 
+    "装甲艇&武装大発Gr": [1.1], 
+    // "装甲艇&武装大発or特四内火Gr": [1, 1.1], 仮置き 
+    "特二内火": [(_, imp) => 1.2 * imp], 
+    "特二内火or特四内火改*2Gr": [1, 1.2], 
+    // "陸戦部隊Gr": [1.85, 1.85*1.45, 1.85*1.45*1.2] 未検証、仮置き
+    "水戦/爆": [1.1], 
+    "艦爆&噴式機Gr": [1.1],
+    "艦爆&噴式機Gr2": [1, 1.1]
   }
 }
