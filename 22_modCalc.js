@@ -1,15 +1,17 @@
 // 22_modCalc.js
 // const enemyModType = "ソフトスキン型"
 // const baseFirePower = 70; // 基本攻撃力換算補正用
+// const isDay = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
   document.getElementById("buttonRunCalc").addEventListener("click", () => {
-    // スロット数、装備条件、敵艦タイプ、基本攻撃力のデータを取得
+    // スロット数、装備条件、敵艦タイプ、基本攻撃力、昼戦or夜戦のデータを取得
     const slotNum = parseInt(document.getElementById("inputSlotNum").value, 10);
+    const mainInputs = getTableInputsData();
     const enemyModType = document.getElementById("inputEnemyType").value;
     const baseFirePower = parseInt(document.getElementById("inputBaseFirePower").value, 10);
-    const mainInputs = getTableInputsData();
+    const isDay = document.getElementById("inputIsDay").value === "true";
     // 「なし」を必ず追加、★平均値改修補正対策
     mainInputs[0] = { nameA: "なし", nameB: "なし", imp: 0, min: 0, max: slotNum };
     // 装備種類数を取得
@@ -178,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
           let paramList = paramsBasicBonusA[enemyModType]?.[key] ?? [1];
           let index = Math.min(value, paramList.length) - 1;
           let param = paramList[index];
-          mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup) : param;
+          mod *= typeof param === "function" ? param(impModLandingCraftGroup, impModTokuNiGroup, isDay) : param;
         }
       }
       conversionModValue *= mod;
@@ -430,23 +432,23 @@ function sortByModList(tableMainOutputs, modList) {
 // メイン乗算補正（個数ごとのリスト）
 // ソフトスキン型、集積地型共通補正
 const paramsBasicBonusASoftSkin = {
-    "三式弾Gr": [2.5],
-    "WG": [1.3, 1.3*1.4], 
-    "四式噴進Gr": [1.25, 1.25*1.5], 
-    "二式迫撃Gr": [1.2, 1.2*1.3], 
-    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.4 * imp], 
-    "特大発Gr": [1.15], 
-    "M4A1Gr": [1.1], 
-    "陸戦隊Gr1": [1.5], 
-    "陸戦隊Gr2": [1, 1.3], 
-    "2号アフリカ": [1.5, 1.5*1.3], 
-    "装甲艇&武装大発Gr": [1.1], // 昼のみの処理は後で考える
-    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
-    "特二内火": [(_, imp) => 1.5 * imp], 
-    "特二内火or特四内火改*2Gr": [1, 1.2], 
-    "陸戦部隊Gr": [1.4, 1.4*1.2, 1.4*1.2*1.1], 
-    "水戦/爆": [1.2]
-  }
+  "三式弾Gr": [2.5],
+  "WG": [1.3, 1.3*1.4], 
+  "四式噴進Gr": [1.25, 1.25*1.5], 
+  "二式迫撃Gr": [1.2, 1.2*1.3], 
+  "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _b, _c) => 1.4 * imp], 
+  "特大発Gr": [1.15], 
+  "M4A1Gr": [1.1], 
+  "陸戦隊Gr1": [1.5], 
+  "陸戦隊Gr2": [1, 1.3], 
+  "2号アフリカ": [1.5, 1.5*1.3], 
+  "装甲艇&武装大発Gr": [(_a, _b, isDay) => isDay ? 1.1 : 1], 
+  "装甲艇&武装大発or特四内火Gr": [1, (_a, _b, isDay) => isDay ? 1.1 : 1], 
+  "特二内火": [(_a, imp, _c) => 1.5 * imp], 
+  "特二内火or特四内火改*2Gr": [1, 1.2], 
+  "陸戦部隊Gr": [1.4, 1.4*1.2, 1.4*1.2*1.1], 
+  "水戦/爆": [1.2]
+}
 const paramsBasicBonusA = {
   "ソフトスキン型": paramsBasicBonusASoftSkin,
   "集積地型": paramsBasicBonusASoftSkin,
@@ -455,15 +457,15 @@ const paramsBasicBonusA = {
     "WG": [1.6, 1.6*1.7], 
     "四式噴進Gr": [1.5, 1.5*1.8], 
     "二式迫撃Gr": [1.3, 1.3*1.5], 
-    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.8 * imp], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _b, _c) => 1.8 * imp], 
     "特大発Gr": [1.15], 
     "M4A1Gr": [2], 
     "陸戦隊Gr1": [1.5], 
     "陸戦隊Gr2": [1, 1.4], 
     "2号アフリカ": [1.5, 1.5*1.4], 
-    "装甲艇&武装大発Gr": [1.3], // 昼のみの処理は後で考える
-    "装甲艇&武装大発or特四内火Gr": [1, 1.2], // 昼のみの処理は後で考える
-    "特二内火": [(_, imp) => 2.4 * imp], 
+    "装甲艇&武装大発Gr": [(_a, _b, isDay) => isDay ? 1.3 : 1], 
+    "装甲艇&武装大発or特四内火Gr": [1, (_a, _b, isDay) => isDay ? 1.2 : 1], 
+    "特二内火": [(_a, imp, _c) => 2.4 * imp], 
     "特二内火or特四内火改*2Gr": [1, 1.35], 
     "水戦/爆": [1.5], 
     "艦爆": [1.5, 1.5*2]
@@ -473,15 +475,15 @@ const paramsBasicBonusA = {
     "WG": [1.4, 1.4*1.5], 
     "四式噴進Gr": [1.3, 1.3*1.65], 
     "二式迫撃Gr": [1.2, 1.2*1.4], 
-    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.8 * imp], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _b, _c) => 1.8 * imp], 
     "特大発Gr": [1.15], 
     "M4A1Gr": [1.8], 
     "陸戦隊Gr1": [1.2], 
     "陸戦隊Gr2": [1, 1.4], 
     "2号アフリカ": [1.2, 1.2*1.4], 
-    "装甲艇&武装大発Gr": [1.3], // 昼のみの処理は後で考える
-    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
-    "特二内火": [(_, imp) => 2.4 * imp], 
+    "装甲艇&武装大発Gr": [(_a, _b, isDay) => isDay ? 1.3 : 1], 
+    "装甲艇&武装大発or特四内火Gr": [1, (_a, _b, isDay) => isDay ? 1.1 : 1], 
+    "特二内火": [(_a, imp, _c) => 2.4 * imp], 
     "特二内火or特四内火改*2Gr": [1, 1.35], 
     "艦爆": [1.4, 1.4*1.75]
   },
@@ -491,15 +493,15 @@ const paramsBasicBonusA = {
     "WG": [1.4, 1.4*1.2], 
     "四式噴進Gr": [1.25, 1.25*1.4], 
     "二式迫撃Gr": [1.1, 1.1*1.15], 
-    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _) => 1.7 * imp], 
+    "上陸用舟艇&特四&陸戦部隊Gr": [(imp, _b, _c) => 1.7 * imp], 
     "特大発Gr": [1.2], 
     "M4A1Gr": [2], 
     "陸戦隊Gr1": [1.6], 
     "陸戦隊Gr2": [1, 1.5], 
     "2号アフリカ": [1.6, 1.6*1.5], 
-    "装甲艇&武装大発Gr": [1.5], // 昼のみの処理は後で考える
-    "装甲艇&武装大発or特四内火Gr": [1, 1.1], // 昼のみの処理は後で考える
-    "特二内火": [(_, imp) => 2.8 * imp], 
+    "装甲艇&武装大発Gr": [(_a, _b, isDay) => isDay ? 1.5 : 1], 
+    "装甲艇&武装大発or特四内火Gr": [1, (_a, _b, isDay) => isDay ? 1.1 : 1], 
+    "特二内火": [(_a, imp, _c) => 2.8 * imp], 
     "特二内火or特四内火改*2Gr": [1, 1.5], 
     "水戦/爆": [1.3], 
     "艦爆": [1.3, 1.3*1.2]
