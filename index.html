@@ -13,6 +13,7 @@
         <!-- タブ切り替えボタン -->
         <button class="tablinks" onclick="openTab(event, 'tabMainInputs')">計算条件</button>
         <button class="tablinks" onclick="openTab(event, 'tabMainOutputs')">計算結果</button>
+        <button class="tablinks" onclick="openTab(event, 'tabInsEquipInputs')">装備コード読込</button>
         <button class="tablinks" onclick="openTab(event, 'tabToDoList')">実装予定項目</button>
 
         <!-- タブごとの表示エリア -->
@@ -74,6 +75,16 @@
             <div id="tableMainOutputs"></div>
         </div>
 
+        <!-- 対地装備タブ -->
+        <div id="tabInsEquipInputs" class="tabcontent">
+            <h2>装備コード読込</h2>
+            <label for="equipCodeInput"><b>装備コード入力：</b></label><br>
+            <textarea id="equipCodeInput" rows="6" cols="60"
+  placeholder="ここに装備コードを貼り付けてください&#10;[{&quot;id&quot;:47,&quot;lv&quot;:0},{&quot;id&quot;:47,&quot;lv&quot;:0},..."></textarea><br>
+            <button id="loadEquipCode">装備コード読込</button>
+            <div id="tableInsCodeImport"></div>
+        </div>
+
         <!-- 実装予定項目タブ -->
         <div id="tabToDoList" class="tabcontent">
             <h2>実装予定項目</h2>
@@ -97,5 +108,6 @@
         <script src="20_main.js"></script>
         <script src="21_mainInputs.js"></script>
         <script src="22_modCalc.js"></script>
+        <script src="23_insEquipInputs.js"></script>
     </body>
 </html>
