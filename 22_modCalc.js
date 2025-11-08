@@ -1,7 +1,4 @@
 // 22_modCalc.js
-// const enemyModType = "ソフトスキン型"
-// const baseFirePower = 70; // 基本攻撃力換算補正用
-// const isDay = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   // 「計算実行」ボタンにクリックイベントを設定
