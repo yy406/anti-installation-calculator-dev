@@ -70,36 +70,28 @@ document.addEventListener("DOMContentLoaded", () => {
       countMap[key].count++;
     }
 
-    console.log("集計中の装備データ:", countMap);
-
     // 結果の配列化
     const resultList = Object.values(countMap);
 
     // ソート処理を追加
     resultList.sort((a, b) => {
-    const pa = allowedEquip.get(a.id)?.priority ?? 9999;
-    const pb = allowedEquip.get(b.id)?.priority ?? 9999;
-
-    // まず priority が小さい順
-    if (pa !== pb) return pa - pb;
-
-    // 同じ priority の場合は level が大きい順
-    return b.level - a.level;
+      const pa = allowedEquip.get(a.id)?.priority ?? 9999;
+      const pb = allowedEquip.get(b.id)?.priority ?? 9999;
+      // まず priority が小さい順
+      if (pa !== pb) return pa - pb;
+      // 同じ priority の場合は level が大きい順
+      return b.level - a.level;
     });
 
-    console.log("フィルタ後の装備リスト:", resultList, typeof resultList);
-    alert(`装備データ ${resultList.length} 種類を集計しました！`);
-
+    // 結果を表示
     let container = document.getElementById("tableInsCodeImport");
     if (resultList.length > 0) {
-    const header = ["ID", "装備名", "改修", "個数"];
-    const rows = resultList.map(item => [item.id, item.equipName, item.level, item.count]);
-
-    // 表を作成して表示
-    container.innerHTML = ""; // 前回の表をクリア
-    container.appendChild(createTable([header, ...rows]));
+      const header = ["ID", "装備名", "改修", "個数"];
+      const rows = resultList.map(item => [item.id, item.equipName, item.level, item.count]);
+      container.innerHTML = ""; // 前回の表をクリア
+      container.appendChild(createTable([header, ...rows]));
     } else {
-    container.textContent = "該当する装備はありません。";
+      container.textContent = "該当する装備はありません。";
     }
   });
 });
