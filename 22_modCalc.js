@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const slotNum = parseInt(document.getElementById("inputSlotNum").value, 10);
     const mainInputs = getTableInputsData();
     const enemyModType = document.getElementById("inputEnemyType").value;
-    const baseFirePower = parseInt(document.getElementById("inputBaseFirePower").value, 10);
+    // const baseFirePower = parseInt(document.getElementById("inputBaseFirePower").value, 10);
+    const baseFirePower = 1; // 攻撃力計算機能つけるまではFbase=1
     const isDay = document.getElementById("inputIsDay").value === "true";
     // 「なし」を必ず追加、★平均値改修補正対策
     mainInputs[0] = { nameA: "なし", nameB: "なし", imp: 0, min: 0, max: slotNum };

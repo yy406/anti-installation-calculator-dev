@@ -86,12 +86,68 @@ document.addEventListener("DOMContentLoaded", () => {
     // 結果を表示
     let container = document.getElementById("tableInsCodeImport");
     if (resultList.length > 0) {
-      const header = ["ID", "装備名", "改修", "個数"];
-      const rows = resultList.map(item => [item.id, item.equipName, item.level, item.count]);
+      const header = ["選択", "ID", "装備名", "改修", "個数"];
+      // const rows = resultList.map(item => [item.id, item.equipName, item.level, item.count]);
+      const rows = resultList.map(item => {
+        // チェックボックスを作成
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        return [checkbox, item.id, item.equipName, item.level, item.count];
+      });
       container.innerHTML = ""; // 前回の表をクリア
       container.appendChild(createTable([header, ...rows]));
     } else {
       container.textContent = "該当する装備はありません。";
     }
   });
+
+  // 「計算条件へ反映」ボタンのクリックイベント
+  document.getElementById("applyInsEquipList").addEventListener("click", () => {
+    const table = document.getElementById("tableInsCodeImport").querySelector("table");
+
+    if (!table) {
+      alert("⚠ 装備表がまだありません。");
+      return;
+    }
+  
+    // チェックが入っている行だけ抽出
+    const selectedRows = [];
+    // <table> の <tr> をループ（1行目はヘッダなのでスキップ）
+    for (let i = 1; i < table.rows.length; i++) {
+      const row = table.rows[i];
+      const checkbox = row.cells[0].querySelector("input[type='checkbox']");
+      if (checkbox && checkbox.checked) {
+        // checkboxのデータ属性から装備情報を取得
+        const equipName = row.cells[2].textContent;
+        const level = row.cells[3].textContent;
+        const count = row.cells[4].textContent;
+        selectedRows.push({equipName, level, count});
+      }
+    }
+
+    // 既存の tableMainInputs をクリア
+    const container = document.getElementById("tableMainInputs");
+    container.innerHTML = "";
+
+    // 選択装備で表を生成
+    const tableMainInputsData = generateTableMainInputsData(selectedRows.length, selectedRows);
+    container.appendChild(createTable(tableMainInputsData));
+  });
+
+  // 「全てチェック」ボタンのクリックイベント
+  document.getElementById("checkAllEquip").addEventListener("click", () => {
+    const table = document.getElementById("tableInsCodeImport").querySelector("table");
+    if (!table) return;
+
+    // <table> の <tr> をループ（1行目はヘッダなのでスキップ）
+    for (let i = 1; i < table.rows.length; i++) {
+      const row = table.rows[i];
+      const checkbox = row.cells[0].querySelector("input[type='checkbox']");
+      if (checkbox) {
+        checkbox.checked = true;
+      }
+    }
+  });
 });
+
+

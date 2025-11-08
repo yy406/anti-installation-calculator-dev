@@ -14,7 +14,7 @@ const defaultMaxValues = [6, 1, 1, 2, 3, 1, 1, 1, 3, 1];
 const options = ["なし", "三式弾", "三式弾改", "三式弾改二", "九一徹甲", "一式徹甲", "一式徹甲改", "WG", "四式噴進", "四式噴進集中", "二式迫撃", "二式迫撃集中", "大発", "陸戦隊", "特大発", "士魂", "M4A1", "装甲艇", "武装大発", "2号アフリカ", "ホニ", "3号アフリカ", "チハ", "チハ改", "3号J型", "特二内火", "特四内火", "特四内火改", "歩兵", "チハ戦車", "チハ改戦車", "歩兵チハ改", "気球", "水戦/爆", "艦爆", "噴式機"]
 
 // 表を構成するデータを生成し、createTable() で使う
-function generateTableMainInputsData(rows = 10) {
+function generateTableMainInputsData(rows = 10, selectedRows = []) {
   const data = [["", "", "装備名", "改修", "min", "max"]]; // ヘッダー
 
   for (let i = 0; i < rows; i++) {
@@ -61,6 +61,14 @@ function generateTableMainInputsData(rows = 10) {
       inputImpNum.value = defaultImpValues[i];
       inputMinValue.value = defaultMinValues[i];
       inputMaxValue.value = defaultMaxValues[i];
+    }
+
+    // selectedRowsから値を取得して反映
+    if (selectedRows[i]) {
+      // 選択行があれば反映
+      selectEquipName.value = selectedRows[i].equipName;
+      inputImpNum.value = selectedRows[i].level;
+      inputMaxValue.value = selectedRows[i].count;
     }
 
     // 2列目　装備名★改修
