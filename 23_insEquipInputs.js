@@ -40,29 +40,54 @@ const allowedEquip = new Map([
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadEquipCode").addEventListener("click", () => {
     // テキストエリアの中身を取得
-    const inputText = document.getElementById("equipCodeInput").value;
+    let raw = document.getElementById("equipCodeInput").value.trim();
 
-    // JSONとしてパース（try-catchで安全に）
+    // svdata= が含まれていたらその後ろだけ抽出
+    if (raw.includes("svdata=")) {
+      // svdata= の後にある最初の { を探す
+      const jsonStart = raw.indexOf("{", raw.indexOf("svdata="));
+      const jsonEnd = raw.lastIndexOf("}");
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        raw = raw.substring(jsonStart, jsonEnd + 1);
+      }
+    }
+
+    // JSONとしてパース
     let equipData;
     try {
-      equipData = JSON.parse(inputText);
+      equipData = JSON.parse(raw);
     } catch (error) {
       alert("⚠ 装備コードの形式が正しくありません。");
       return;
     }
 
+    // svdata形式なら api_slot_item を抽出
+    if (equipData.api_data?.api_slot_item) {
+      equipData = equipData.api_data.api_slot_item.map(item => ({
+        api_slotitem_id: item.api_slotitem_id,
+        api_level: item.api_level ?? 0
+      }));
+    }
+
     // 対地装備のみフィルタリング（allowedEquipに存在するidだけ残す）
-    const filtered = equipData.filter(item => allowedEquip.has(item.id));
+    const filtered = equipData.filter(item => {
+      const id = item.id ?? item.api_slotitem_id;
+      return allowedEquip.has(id);
+    });
 
     // 装備の集計
     const countMap = {};
     for (const item of filtered) {
-      const key = `${item.id}_${item.lv}`;
-      const info = allowedEquip.get(item.id);
+      // どちらの形式でも対応できるようにする
+      const id = item.id ?? item.api_slotitem_id;
+      const lv = item.lv ?? item.api_level;
+
+      const key = `${id}_${lv}`;
+      const info = allowedEquip.get(id);
       if (!countMap[key]) {
         countMap[key] = {
-          id: item.id,
-          level: item.lv,
+          id: id,
+          level: lv,
           count: 0,
           equipName: info?.equipName ?? "(unknown)"
         };
